@@ -13,8 +13,8 @@ int main()
     }
 
     // Create regex to capture each of the two ints in pattern
-    const std::regex base_pattern("mul\\(([0-9]+),([0-9]+)\\)"); // mul([any int],[any int]);
-    auto             match_begin = std::sregex_iterator(input.begin(), input.end(), base_pattern);
+    const std::regex mul_pattern("mul\\(([0-9]+),([0-9]+)\\)"); // mul([any int],[any int]);
+    auto             match_begin = std::sregex_iterator(input.begin(), input.end(), mul_pattern);
     auto             match_end   = std::sregex_iterator();
 
     int x1;
@@ -41,15 +41,31 @@ int main()
     int y2;
     sum = 0;
 
-    bool do = true;
+    const std::regex do_pattern("do\\(\\)");
+    const std::regex dont_pattern("don't\\(\\)");
+    bool             enabled = true;
 
     for(auto it = match2_begin; it != match2_end; ++it)
     {
-        std::smatch match = *it;
+        // Get string that matched one of the three patterns
+        std::smatch match              = *it;
+        std::string intermediate_match = match.str(0);
+
         // First check which pattern it matched
+        std::smatch match_result;
+        if(std::regex_match(intermediate_match, do_pattern))
+        {
+            enabled = true;
+            continue;
+        }
+        else if(std::regex_match(intermediate_match, dont_pattern))
+        {
+            enabled = false;
+            continue;
+        }
 
         // Grab from each capture group; idx 0 is entire match so start at 1
-        if(do)
+        if(enabled)
         {
             y1 = std::stoi(match.str(1));
             y2 = std::stoi(match.str(2));
